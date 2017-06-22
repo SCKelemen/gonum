@@ -15,9 +15,9 @@ import (
 // Bhattacharyya is a type for computing the Bhattacharyya distance between
 // probability distributions.
 //
-// The Battacharyya distance is defined as
+// The Bhattacharyya distance is defined as
 //  D_B = -ln(BC(l,r))
-//  BC = \int_x (p(x)q(x))^(1/2) dx
+//  BC = \int_-∞^∞ (p(x)q(x))^(1/2) dx
 // Where BC is known as the Bhattacharyya coefficient.
 // The Bhattacharyya distance is related to the Hellinger distance by
 //  H = sqrt(1-BC)
@@ -135,7 +135,6 @@ func (Hellinger) DistNormal(l, r *Normal) float64 {
 }
 
 // KullbackLiebler is a type for computing the Kullback-Leibler divergence from l to r.
-// The dimensions of the input distributions must match or the function will panic.
 //
 // The Kullback-Liebler divergence is defined as
 //  D_KL(l || r ) = \int_x p(x) log(p(x)/q(x)) dx
@@ -208,13 +207,12 @@ func (KullbackLeibler) DistUniform(l, r *Uniform) float64 {
 }
 
 // Renyi is a type for computing the Rényi divergence of order α from l to r.
-// The dimensions of the input distributions must match or the function will panic.
 //
 // The Rényi divergence with α > 0, α ≠ 1 is defined as
-//  D_α(l || r) = 1/(α-1) log(\int_x l(x)^α r(x)^(1-α)dx)
+//  D_α(l || r) = 1/(α-1) log(\int_-∞^∞ l(x)^α r(x)^(1-α)dx)
 // The Rényi divergence has special forms for α = 0 and α = 1. This type does
 // not implement α = ∞. For α = 0,
-//  D_0(l || r) = -log \int_x r(x)1{p(x)>0} dx
+//  D_0(l || r) = -log \int_-∞^∞ r(x)1{p(x)>0} dx
 // that is, the negative log probability under r(x) that l(x) > 0.
 // When α = 1, the Rényi divergence is equal to the Kullback-Leibler divergence.
 // The Rényi divergence is also equal to half the Bhattacharyya distance when α = 0.5.
@@ -229,13 +227,13 @@ type Renyi struct {
 //
 // For two normal distributions, the Rényi divergence is computed as
 //  Σ_α = (1-α) Σ_l + αΣ_r
-//  D_α(l||r) = α/2 * (μ_l - μ_r)'*Σ_α^-1*(μ_l - μ_r) + 1/(2(α-1))*[ln(|Σ_λ|/(|Σ_l|^(1-α)+|Σ_r|^α)]
+//  D_α(l||r) = α/2 * (μ_l - μ_r)'*Σ_α^-1*(μ_l - μ_r) + 1/(2(α-1))*ln(|Σ_λ|/(|Σ_l|^(1-α)*|Σ_r|^α))
 //
 // For a more nicely formatted version of the formula, see Eq. 15 of
 //  Kolchinsky, Artemy, and Brendan D. Tracey. "Estimating Mixture Entropy
 //  with Pairwise Distances." arXiv preprint arXiv:1706.02419 (2017).
-// Note that the this formula is for the Chernoff divergence, which differs from
-// the Rényi divergence by a factor of 1 - α. Also be aware that most sources in
+// Note that the this formula is for Chernoff divergence, which differs from
+// Rényi divergence by a factor of 1-α. Also be aware that most sources in
 // the literature report this formula incorrectly.
 func (renyi Renyi) DistNormal(l, r *Normal) float64 {
 	if renyi.Alpha < 0 {
