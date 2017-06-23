@@ -277,6 +277,38 @@ func (n *Normal) Rand(x []float64) []float64 {
 	return x
 }
 
+// ScoreInput returns the score function with respect to the input of the
+// distribution at the location specified by x. The score function is the
+// derivative of the log-probability at the input.
+//  ∂/∂x log(p(x))
+// If deriv is nil, a new slice will be allocated and returned. If deriv is of
+// length the dimension of Normal, then the result will be put in-place into deriv.
+// If neither of these is true, ScoreInput will panic.
+func (n *Normal) ScoreInput(deriv, x []float64) []float64 {
+	// Normal log probability is
+	//  c - 0.5*(x-μ)' Σ^-1 (x-μ).
+	// So the derivative is just
+	//  -Σ^-1 (x-μ).
+	if len(x) != n.Dim() {
+		panic(badInputLength)
+	}
+	if deriv == nil {
+		deriv = make([]float64, len(x))
+	}
+	if len(deriv) != len(x) {
+		panic(badSizeMismatch)
+	}
+	tmp := make([]float64, len(x))
+	copy(x, tmp)
+	floats.Sub(tmp, n.mu)
+
+	dv := mat.NewVector(len(deriv), deriv)
+	dt := mat.NewVector(len(tmp), tmp)
+	dv.SolveCholeskyVec(&n.chol, dt)
+	floats.Scale(-1, deriv)
+	return deriv
+}
+
 // SetMean changes the mean of the normal distribution. SetMean panics if len(mu)
 // does not equal the dimension of the normal distribution.
 func (n *Normal) SetMean(mu []float64) {
