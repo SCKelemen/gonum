@@ -559,8 +559,12 @@ func TestNormalScoreInput(t *testing.T) {
 		if !ok {
 			t.Fatalf("Bad test, covariance matrix not positive definite")
 		}
-		x := test.x
+		x := make([]float64, len(test.x))
+		copy(x, test.x)
 		deriv := normal.ScoreInput(nil, x)
+		if !floats.Equal(x, test.x) {
+			t.Errorf("x modified during call to ScoreInput")
+		}
 		derivFD := fd.Gradient(nil, normal.LogProb, x, nil)
 		if !floats.EqualApprox(deriv, derivFD, 1e-4) {
 			t.Errorf("Case %d: derivative mismatch. Got %v, want %v", cas, deriv, derivFD)

@@ -299,7 +299,7 @@ func (n *Normal) ScoreInput(deriv, x []float64) []float64 {
 		panic(badSizeMismatch)
 	}
 	tmp := make([]float64, len(x))
-	copy(x, tmp)
+	copy(tmp, x)
 	floats.Sub(tmp, n.mu)
 
 	dv := mat.NewVector(len(deriv), deriv)
