@@ -561,13 +561,13 @@ func TestNormalScoreInput(t *testing.T) {
 		}
 		x := make([]float64, len(test.x))
 		copy(x, test.x)
-		deriv := normal.ScoreInput(nil, x)
+		score := normal.ScoreInput(nil, x)
 		if !floats.Equal(x, test.x) {
 			t.Errorf("x modified during call to ScoreInput")
 		}
-		derivFD := fd.Gradient(nil, normal.LogProb, x, nil)
-		if !floats.EqualApprox(deriv, derivFD, 1e-4) {
-			t.Errorf("Case %d: derivative mismatch. Got %v, want %v", cas, deriv, derivFD)
+		scoreFD := fd.Gradient(nil, normal.LogProb, x, nil)
+		if !floats.EqualApprox(score, scoreFD, 1e-4) {
+			t.Errorf("Case %d: derivative mismatch. Got %v, want %v", cas, score, scoreFD)
 		}
 	}
 }
